@@ -51,6 +51,7 @@ import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.omistark.smartvue.model.CameraXViewModel;
 import com.omistark.smartvue.preference.PreferenceUtils;
+import com.omistark.smartvue.preference.SettingsActivity;
 import com.omistark.smartvue.processing.FaceDetectorProcessor;
 import com.omistark.smartvue.processing.GraphicOverlay;
 import com.omistark.smartvue.utils.VisionImageProcessor;
@@ -167,15 +168,15 @@ public final class CameraXLivePreviewActivity extends AppCompatActivity
                             }
                         });
 
-//        ImageView settingsButton = findViewById(R.id.settings_button);
-//        settingsButton.setOnClickListener(
-//                v -> {
-//                    Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-//                    intent.putExtra(
-//                            SettingsActivity.EXTRA_LAUNCH_SOURCE,
-//                            SettingsActivity.LaunchSource.CAMERAX_LIVE_PREVIEW);
-//                    startActivity(intent);
-//                });
+        ImageView settingsButton = findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(
+                v -> {
+                    Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                    intent.putExtra(
+                            SettingsActivity.EXTRA_LAUNCH_SOURCE,
+                            SettingsActivity.LaunchSource.CAMERAX_LIVE_PREVIEW);
+                    startActivity(intent);
+                });
 
         if (!allPermissionsGranted()) {
             getRuntimePermissions();

@@ -1,15 +1,10 @@
 package com.omistark.smartvue;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.Size;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -22,17 +17,6 @@ import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
-import com.omistark.smartvue.model.CameraXViewModel;
-import com.omistark.smartvue.preference.PreferenceUtils;
-import com.omistark.smartvue.utils.VisionImageProcessor;
-
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory;
-
 import java.util.List;
 
 public class FaceDetectionActivity extends AppCompatActivity {
@@ -163,10 +147,6 @@ public class FaceDetectionActivity extends AppCompatActivity {
             }
         }
         // [END mlkit_face_list]
-    }
-
-    private void calibrateFace(){
-
     }
 
 }
