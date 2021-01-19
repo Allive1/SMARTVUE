@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "135714352309",
+    "firebase_url": "https://smartvue-186515.firebaseio.com",
+    "project_id": "smartvue-186515",
+    "storage_bucket": "smartvue-186515.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135714352309:android:f305afbc955247f1e7a2fc",
+        "android_client_info": {
+          "package_name": "com.omistark.smartvue"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135714352309-g1111qd0dkgu6ecog3sct1el6nfvgg92.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn5Fec05fL138eHTs5S8Uo3aeECwed2Xo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "135714352309-g1111qd0dkgu6ecog3sct1el6nfvgg92.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
