@@ -1,11 +1,9 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import androidx.annotation.Nullable;
-
-import com.omistark.smartvue.processing.GraphicOverlay;
 
 /** Graphic instance for rendering inference info (latency, FPS, resolution) in an overlay view. */
 public class InferenceInfoGraphic extends GraphicOverlay.Graphic {

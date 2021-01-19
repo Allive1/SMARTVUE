@@ -7,6 +7,9 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,16 +24,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.omistark.smartvue.model.CameraXViewModel;
+import com.google.mlkit.common.MlKitException;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
+import com.google.mlkit.vision.pose.PoseDetectorOptionsBase;
+import com.omistark.smartvue.feature.model.CameraXViewModel;
+import com.omistark.smartvue.preference.PreferenceUtils;
 import com.omistark.smartvue.preference.SettingsActivity;
-import com.omistark.smartvue.processing.GraphicOverlay;
-import com.omistark.smartvue.utils.VisionImageProcessor;
+import com.omistark.smartvue.preference.SettingsActivity.LaunchSource;
+import com.omistark.smartvue.processing.detection.facedetector.FaceDetectorProcessor;
+import com.omistark.smartvue.processing.utils.GraphicOverlay;
+import com.omistark.smartvue.processing.utils.VisionImageProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +51,8 @@ public final class DemoActivity extends AppCompatActivity
         AdapterView.OnItemSelectedListener,
         CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "Demo";
+    private static final int PERMISSION_REQUESTS = 1;
+
     private static final String ZOOM_FUNCTION = "Zoom Detection";
     private static final String FLIP_FUNCTION = "Flip Detection";
     private static final String SCROLL_FUNCTION = "Scroll Detection";
@@ -49,24 +62,33 @@ public final class DemoActivity extends AppCompatActivity
     private static final String STATE_SELECTED_MODEL = "selected_model";
     private static final String STATE_LENS_FACING = "lens_facing";
 
-    private String selectedModel = FACE_DETECTION;
-    private int lensFacing = CameraSelector.LENS_FACING_BACK;
-    private CameraSelector cameraSelector;
-
     private PreviewView previewView;
     private GraphicOverlay graphicOverlay;
 
-    @Nullable
-    private ProcessCameraProvider cameraProvider;
-    @Nullable
-    private VisionImageProcessor imageProcessor;
+    @Nullable private ProcessCameraProvider cameraProvider;
+    @Nullable private Preview previewUseCase;
+    @Nullable private ImageAnalysis analysisUseCase;
+    @Nullable private VisionImageProcessor imageProcessor;
+    private boolean needUpdateGraphicOverlayImageSourceInfo;
 
-    private static final int PERMISSION_REQUESTS = 1;
+    private String selectedModel = FACE_DETECTION;
+    private int lensFacing = CameraSelector.LENS_FACING_BACK;
+    private CameraSelector cameraSelector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "CameraX is only supported on SDK version >=21. Current SDK version is "
+                            + Build.VERSION.SDK_INT,
+                    Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
 
         if (savedInstanceState != null) {
             selectedModel = savedInstanceState.getString(STATE_SELECTED_MODEL, FACE_DETECTION);
@@ -177,6 +199,23 @@ public final class DemoActivity extends AppCompatActivity
                 .show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.live_preview_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra(SettingsActivity.EXTRA_LAUNCH_SOURCE, LaunchSource.CAMERAX_LIVE_PREVIEW);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
     Activity
@@ -204,17 +243,177 @@ public final class DemoActivity extends AppCompatActivity
     }
 
 
-    /*
-    Permissions
-     */
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode, String[] permissions, int[] grantResults) {
-        Log.i(TAG, "Permission granted!");
-        if (allPermissionsGranted()) {
-            bindAllCameraUseCases();
+    private void bindAllCameraUseCases() {
+        if (cameraProvider != null) {
+            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
+            cameraProvider.unbindAll();
+            bindPreviewUseCase();
+            bindAnalysisUseCase();
         }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void bindPreviewUseCase() {
+        if (!PreferenceUtils.isCameraLiveViewportEnabled(this)) {
+            return;
+        }
+        if (cameraProvider == null) {
+            return;
+        }
+        if (previewUseCase != null) {
+            cameraProvider.unbind(previewUseCase);
+        }
+
+        Preview.Builder builder = new Preview.Builder();
+        Size targetResolution = PreferenceUtils.getCameraXTargetResolution(this);
+        if (targetResolution != null) {
+            builder.setTargetResolution(targetResolution);
+        }
+        previewUseCase = builder.build();
+        previewUseCase.setSurfaceProvider(previewView.getSurfaceProvider());
+        cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, previewUseCase);
+    }
+
+    private void bindAnalysisUseCase() {
+        if (cameraProvider == null) {
+            return;
+        }
+        if (analysisUseCase != null) {
+            cameraProvider.unbind(analysisUseCase);
+        }
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+
+        try {
+            switch (selectedModel) {
+//                case OBJECT_DETECTION:
+//                    Log.i(TAG, "Using Object Detector Processor");
+//                    ObjectDetectorOptions objectDetectorOptions =
+//                            PreferenceUtils.getObjectDetectorOptionsForLivePreview(this);
+//                    imageProcessor = new ObjectDetectorProcessor(this, objectDetectorOptions);
+//                    break;
+//                case OBJECT_DETECTION_CUSTOM:
+//                    Log.i(TAG, "Using Custom Object Detector (Bird) Processor");
+//                    LocalModel localModel =
+//                            new LocalModel.Builder()
+//                                    .setAssetFilePath("custom_models/bird_classifier.tflite")
+//                                    .build();
+//                    CustomObjectDetectorOptions customObjectDetectorOptions =
+//                            PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(this, localModel);
+//                    imageProcessor = new ObjectDetectorProcessor(this, customObjectDetectorOptions);
+//                    break;
+//                case TEXT_RECOGNITION:
+//                    Log.i(TAG, "Using on-device Text recognition Processor");
+//                    imageProcessor = new TextRecognitionProcessor(this);
+//                    break;
+                case FACE_DETECTION:
+                    Log.i(TAG, "Using Face Detector Processor");
+                    FaceDetectorOptions faceDetectorOptions =
+                            PreferenceUtils.getFaceDetectorOptionsForLivePreview(this);
+                    imageProcessor = new FaceDetectorProcessor(this, faceDetectorOptions);
+                    break;
+//                case BARCODE_SCANNING:
+//                    Log.i(TAG, "Using Barcode Detector Processor");
+//                    imageProcessor = new BarcodeScannerProcessor(this);
+//                    break;
+//                case IMAGE_LABELING:
+//                    Log.i(TAG, "Using Image Label Detector Processor");
+//                    imageProcessor = new LabelDetectorProcessor(this, ImageLabelerOptions.DEFAULT_OPTIONS);
+//                    break;
+//                case IMAGE_LABELING_CUSTOM:
+//                    Log.i(TAG, "Using Custom Image Label (Bird) Detector Processor");
+//                    LocalModel localClassifier =
+//                            new LocalModel.Builder()
+//                                    .setAssetFilePath("custom_models/bird_classifier.tflite")
+//                                    .build();
+//                    CustomImageLabelerOptions customImageLabelerOptions =
+//                            new CustomImageLabelerOptions.Builder(localClassifier).build();
+//                    imageProcessor = new LabelDetectorProcessor(this, customImageLabelerOptions);
+//                    break;
+//                case AUTOML_LABELING:
+//                    Log.i(TAG, "Using AutoML Image Label Detector Processor");
+//                    AutoMLImageLabelerLocalModel autoMLLocalModel =
+//                            new AutoMLImageLabelerLocalModel.Builder()
+//                                    .setAssetFilePath("automl/manifest.json")
+//                                    .build();
+//                    AutoMLImageLabelerOptions autoMLOptions =
+//                            new AutoMLImageLabelerOptions.Builder(autoMLLocalModel)
+//                                    .setConfidenceThreshold(0)
+//                                    .build();
+//                    imageProcessor = new LabelDetectorProcessor(this, autoMLOptions);
+//                    break;
+//                case POSE_DETECTION:
+//                    PoseDetectorOptionsBase poseDetectorOptions =
+//                            PreferenceUtils.getPoseDetectorOptionsForLivePreview(this);
+//                    boolean shouldShowInFrameLikelihood =
+//                            PreferenceUtils.shouldShowPoseDetectionInFrameLikelihoodLivePreview(this);
+//                    imageProcessor =
+//                            new PoseDetectorProcessor(this, poseDetectorOptions, shouldShowInFrameLikelihood);
+//                    break;
+                default:
+                    throw new IllegalStateException("Invalid model name");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Can not create image processor: " + selectedModel, e);
+            Toast.makeText(
+                    getApplicationContext(),
+                    "Can not create image processor: " + e.getLocalizedMessage(),
+                    Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        ImageAnalysis.Builder builder = new ImageAnalysis.Builder();
+        Size targetResolution = PreferenceUtils.getCameraXTargetResolution(this);
+        if (targetResolution != null) {
+            builder.setTargetResolution(targetResolution);
+        }
+        analysisUseCase = builder.build();
+
+        needUpdateGraphicOverlayImageSourceInfo = true;
+        analysisUseCase.setAnalyzer(
+                // imageProcessor.processImageProxy will use another thread to run the detection underneath,
+                // thus we can just runs the analyzer itself on main thread.
+                ContextCompat.getMainExecutor(this),
+                imageProxy -> {
+                    if (needUpdateGraphicOverlayImageSourceInfo) {
+                        boolean isImageFlipped = lensFacing == CameraSelector.LENS_FACING_FRONT;
+                        int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
+                        if (rotationDegrees == 0 || rotationDegrees == 180) {
+                            graphicOverlay.setImageSourceInfo(
+                                    imageProxy.getWidth(), imageProxy.getHeight(), isImageFlipped);
+                        } else {
+                            graphicOverlay.setImageSourceInfo(
+                                    imageProxy.getHeight(), imageProxy.getWidth(), isImageFlipped);
+                        }
+                        needUpdateGraphicOverlayImageSourceInfo = false;
+                    }
+                    try {
+                        imageProcessor.processImageProxy(imageProxy, graphicOverlay);
+                    } catch (MlKitException e) {
+                        Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
+                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
+
+        cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, analysisUseCase);
+    }
+
+    private String[] getRequiredPermissions() {
+        try {
+            PackageInfo info =
+                    this.getPackageManager()
+                            .getPackageInfo(this.getPackageName(), PackageManager.GET_PERMISSIONS);
+            String[] ps = info.requestedPermissions;
+            if (ps != null && ps.length > 0) {
+                return ps;
+            } else {
+                return new String[0];
+            }
+        } catch (Exception e) {
+            return new String[0];
+        }
     }
 
     private boolean allPermissionsGranted() {
@@ -240,20 +439,14 @@ public final class DemoActivity extends AppCompatActivity
         }
     }
 
-    private String[] getRequiredPermissions() {
-        try {
-            PackageInfo info =
-                    this.getPackageManager()
-                            .getPackageInfo(this.getPackageName(), PackageManager.GET_PERMISSIONS);
-            String[] ps = info.requestedPermissions;
-            if (ps != null && ps.length > 0) {
-                return ps;
-            } else {
-                return new String[0];
-            }
-        } catch (Exception e) {
-            return new String[0];
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
+        Log.i(TAG, "Permission granted!");
+        if (allPermissionsGranted()) {
+            bindAllCameraUseCases();
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private static boolean isPermissionGranted(Context context, String permission) {
@@ -264,14 +457,5 @@ public final class DemoActivity extends AppCompatActivity
         }
         Log.i(TAG, "Permission NOT granted: " + permission);
         return false;
-    }
-
-    private void bindAllCameraUseCases() {
-        if (cameraProvider != null) {
-            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
-            cameraProvider.unbindAll();
-//            bindPreviewUseCase();
-//            bindAnalysisUseCase();
-        }
     }
 }

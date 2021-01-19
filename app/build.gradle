@@ -81,6 +81,19 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:26.1.1')
     implementation 'com.google.firebase:firebase-analytics'
+
+    // Object detection feature with bundled default classifier
+    implementation 'com.google.mlkit:object-detection:16.2.1'
+
+    // Object detection feature with custom classifier support
+    implementation 'com.google.mlkit:object-detection-custom:16.2.1'
+
+    // Pose detection with default models
+    implementation 'com.google.mlkit:pose-detection:17.0.0'
+    // Pose detection with accurate models
+    implementation 'com.google.mlkit:pose-detection-accurate:17.0.0'
+
+
 }
 
 configurations {

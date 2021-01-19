@@ -1,4 +1,4 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;

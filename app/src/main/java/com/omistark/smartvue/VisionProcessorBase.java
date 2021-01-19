@@ -1,4 +1,4 @@
-package com.omistark.smartvue.processing;
+package com.omistark.smartvue;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -20,15 +20,14 @@ import androidx.camera.core.ImageProxy;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskExecutors;
 import com.google.mlkit.vision.common.InputImage;
-import com.omistark.smartvue.utils.BitmapUtils;
-import com.omistark.smartvue.utils.CameraImageGraphic;
-import com.omistark.smartvue.utils.FrameMetadata;
-import com.omistark.smartvue.processing.GraphicOverlay;
-import com.omistark.smartvue.utils.InferenceInfoGraphic;
-import com.omistark.smartvue.utils.ScopedExecutor;
-import com.omistark.smartvue.utils.VisionImageProcessor;
+import com.omistark.smartvue.processing.utils.BitmapUtils;
+import com.omistark.smartvue.processing.utils.CameraImageGraphic;
+import com.omistark.smartvue.processing.utils.FrameMetadata;
+import com.omistark.smartvue.processing.utils.GraphicOverlay;
+import com.omistark.smartvue.processing.utils.InferenceInfoGraphic;
+import com.omistark.smartvue.processing.utils.ScopedExecutor;
+import com.omistark.smartvue.processing.utils.VisionImageProcessor;
 import com.omistark.smartvue.preference.PreferenceUtils;
-import com.omistark.smartvue.utils.VisionImageProcessor;
 
 import java.nio.ByteBuffer;
 import java.util.Timer;

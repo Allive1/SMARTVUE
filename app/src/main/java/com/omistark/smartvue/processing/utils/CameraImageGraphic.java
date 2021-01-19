@@ -1,13 +1,10 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import com.omistark.smartvue.processing.GraphicOverlay;
-import com.omistark.smartvue.processing.GraphicOverlay.Graphic;
-
 /** Draw camera image to background. */
-public class CameraImageGraphic extends Graphic {
+public class CameraImageGraphic extends GraphicOverlay.Graphic {
 
     private final Bitmap bitmap;
 

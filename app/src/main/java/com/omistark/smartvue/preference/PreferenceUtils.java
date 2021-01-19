@@ -9,9 +9,11 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import com.google.android.gms.common.images.Size;
 import com.google.common.base.Preconditions;
-import com.google.mlkit.common.model.LocalModel;
-import com.omistark.smartvue.utils.CameraSource;
-import com.omistark.smartvue.utils.CameraSource.SizePair;
+import com.google.mlkit.vision.pose.PoseDetectorOptionsBase;
+import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions;
+import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions;
+import com.omistark.smartvue.processing.utils.CameraSource;
+import com.omistark.smartvue.processing.utils.CameraSource.SizePair;
 import com.omistark.smartvue.R;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 //import com.google.mlkit.vision.objects.ObjectDetectorOptionsBase.DetectorMode;
@@ -200,22 +202,22 @@ public class PreferenceUtils {
         return optionsBuilder.build();
     }
 
-//    public static PoseDetectorOptionsBase getPoseDetectorOptionsForLivePreview(Context context) {
-//        int performanceMode =
-//                getModeTypePreferenceValue(
-//                        context,
-//                        R.string.pref_key_live_preview_pose_detection_performance_mode,
-//                        POSE_DETECTOR_PERFORMANCE_MODE_FAST);
-//        if (performanceMode == POSE_DETECTOR_PERFORMANCE_MODE_FAST) {
-//            return new PoseDetectorOptions.Builder()
-//                    .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
-//                    .build();
-//        } else {
-//            return new AccuratePoseDetectorOptions.Builder()
-//                    .setDetectorMode(AccuratePoseDetectorOptions.STREAM_MODE)
-//                    .build();
-//        }
-//    }
+    public static PoseDetectorOptionsBase getPoseDetectorOptionsForLivePreview(Context context) {
+        int performanceMode =
+                getModeTypePreferenceValue(
+                        context,
+                        R.string.pref_key_live_preview_pose_detection_performance_mode,
+                        POSE_DETECTOR_PERFORMANCE_MODE_FAST);
+        if (performanceMode == POSE_DETECTOR_PERFORMANCE_MODE_FAST) {
+            return new PoseDetectorOptions.Builder()
+                    .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
+                    .build();
+        } else {
+            return new AccuratePoseDetectorOptions.Builder()
+                    .setDetectorMode(AccuratePoseDetectorOptions.STREAM_MODE)
+                    .build();
+        }
+    }
 
 //    public static PoseDetectorOptionsBase getPoseDetectorOptionsForStillImage(Context context) {
 //        int performanceMode =

@@ -1,4 +1,4 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -16,7 +16,6 @@ import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import com.google.android.gms.common.images.Size;
 import com.omistark.smartvue.preference.PreferenceUtils;
-import com.omistark.smartvue.processing.GraphicOverlay;
 
 import java.io.IOException;
 import java.lang.Thread.State;

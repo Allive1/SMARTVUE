@@ -1,11 +1,10 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import android.graphics.Bitmap;
 import android.os.Build.VERSION_CODES;
 import androidx.annotation.RequiresApi;
 import androidx.camera.core.ImageProxy;
 import com.google.mlkit.common.MlKitException;
-import com.omistark.smartvue.processing.GraphicOverlay;
 
 import java.nio.ByteBuffer;
 

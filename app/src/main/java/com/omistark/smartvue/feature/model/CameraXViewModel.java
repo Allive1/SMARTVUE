@@ -1,4 +1,4 @@
-package com.omistark.smartvue.model;
+package com.omistark.smartvue.feature.model;
 
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;

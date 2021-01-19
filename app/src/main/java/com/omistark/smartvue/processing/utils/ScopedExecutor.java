@@ -1,4 +1,4 @@
-package com.omistark.smartvue.utils;
+package com.omistark.smartvue.processing.utils;
 
 import androidx.annotation.NonNull;
 import java.util.concurrent.Executor;
