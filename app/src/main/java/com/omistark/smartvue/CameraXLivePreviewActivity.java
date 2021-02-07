@@ -72,17 +72,17 @@ public final class CameraXLivePreviewActivity extends AppCompatActivity
     private static final String TAG = "CameraXLivePreview";
     private static final int PERMISSION_REQUESTS = 1;
 
-    private static final String OBJECT_DETECTION = "Object Detection";
-    private static final String OBJECT_DETECTION_CUSTOM = "Custom Object Detection (Bird)";
-    private static final String CUSTOM_AUTOML_OBJECT_DETECTION =
-            "Custom AutoML Object Detection (Flower)";
+//    private static final String OBJECT_DETECTION = "Object Detection";
+//    private static final String OBJECT_DETECTION_CUSTOM = "Custom Object Detection (Bird)";
+//    private static final String CUSTOM_AUTOML_OBJECT_DETECTION =
+//            "Custom AutoML Object Detection (Flower)";
     private static final String FACE_DETECTION = "Face Detection";
-    private static final String TEXT_RECOGNITION = "Text Recognition";
-    private static final String BARCODE_SCANNING = "Barcode Scanning";
-    private static final String IMAGE_LABELING = "Image Labeling";
-    private static final String IMAGE_LABELING_CUSTOM = "Custom Image Labeling (Bird)";
-    private static final String CUSTOM_AUTOML_LABELING = "Custom AutoML Image Labeling (Flower)";
-    private static final String POSE_DETECTION = "Pose Detection";
+//    private static final String TEXT_RECOGNITION = "Text Recognition";
+//    private static final String BARCODE_SCANNING = "Barcode Scanning";
+//    private static final String IMAGE_LABELING = "Image Labeling";
+//    private static final String IMAGE_LABELING_CUSTOM = "Custom Image Labeling (Bird)";
+//    private static final String CUSTOM_AUTOML_LABELING = "Custom AutoML Image Labeling (Flower)";
+//    private static final String POSE_DETECTION = "Pose Detection";
 
     private static final String STATE_SELECTED_MODEL = "selected_model";
     private static final String STATE_LENS_FACING = "lens_facing";
@@ -96,7 +96,7 @@ public final class CameraXLivePreviewActivity extends AppCompatActivity
     @Nullable private VisionImageProcessor imageProcessor;
     private boolean needUpdateGraphicOverlayImageSourceInfo;
 
-    private String selectedModel = OBJECT_DETECTION;
+    private String selectedModel = FACE_DETECTION;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private CameraSelector cameraSelector;
 
@@ -116,7 +116,7 @@ public final class CameraXLivePreviewActivity extends AppCompatActivity
         }
 
         if (savedInstanceState != null) {
-            selectedModel = savedInstanceState.getString(STATE_SELECTED_MODEL, OBJECT_DETECTION);
+            selectedModel = savedInstanceState.getString(STATE_SELECTED_MODEL, FACE_DETECTION);
             lensFacing = savedInstanceState.getInt(STATE_LENS_FACING, CameraSelector.LENS_FACING_BACK);
         }
         cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();

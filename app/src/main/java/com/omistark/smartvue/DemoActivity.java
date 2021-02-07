@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -53,7 +54,7 @@ public final class DemoActivity extends AppCompatActivity
     private static final String TAG = "Demo";
     private static final int PERMISSION_REQUESTS = 1;
 
-    private static final String ZOOM_FUNCTION = "Zoom Detection";
+    private static final String ZOOM_FUNCTION = "Face Detection";
     private static final String FLIP_FUNCTION = "Flip Detection";
     private static final String SCROLL_FUNCTION = "Scroll Detection";
 
@@ -148,6 +149,8 @@ public final class DemoActivity extends AppCompatActivity
         if (!allPermissionsGranted()) {
             getRuntimePermissions();
         }
+
+        TextView contentTextView = findViewById(R.id.sample_text_view);
     }
 
     @Override
