@@ -43,6 +43,7 @@ import com.omistark.smartvue.preference.SettingsActivity.LaunchSource;
 import com.omistark.smartvue.processing.detection.facedetector.FaceDetectorProcessor;
 import com.omistark.smartvue.processing.utils.GraphicOverlay;
 import com.omistark.smartvue.processing.utils.VisionImageProcessor;
+import com.omistark.smartvue.sample.Instruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +76,8 @@ public final class DemoActivity extends AppCompatActivity
     private String selectedModel = FACE_DETECTION;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private CameraSelector cameraSelector;
+
+    private Instruction sample_instructions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +153,10 @@ public final class DemoActivity extends AppCompatActivity
             getRuntimePermissions();
         }
 
+        // Load Instruction View
         TextView contentTextView = findViewById(R.id.sample_text_view);
+        sample_instructions = new Instruction(this.getApplicationContext());
+        contentTextView.setText(sample_instructions.getSample());
     }
 
     @Override
