@@ -1,5 +1,10 @@
 package com.omistark.smartvue;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -13,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -34,6 +40,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.mlkit.common.MlKitException;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.pose.PoseDetectorOptionsBase;
 import com.omistark.smartvue.feature.model.CameraXViewModel;
@@ -78,6 +86,7 @@ public final class DemoActivity extends AppCompatActivity
     private CameraSelector cameraSelector;
 
     private Instruction sample_instructions;
+    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,11 +162,25 @@ public final class DemoActivity extends AppCompatActivity
             getRuntimePermissions();
         }
 
+
+
         // Load Instruction View
         TextView contentTextView = findViewById(R.id.sample_text_view);
         sample_instructions = new Instruction(this.getApplicationContext());
-        contentTextView.setText(sample_instructions.getSample());
+
+        // Run timed instructions and run calibration
+        contentTextView.setText(sample_instructions.getSample("zoom_samples"));
+
+
+        // Enable Demo Start
+        button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+            }
+        });
     }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle bundle) {
@@ -295,31 +318,20 @@ public final class DemoActivity extends AppCompatActivity
 
         try {
             switch (selectedModel) {
-//                case OBJECT_DETECTION:
-//                    Log.i(TAG, "Using Object Detector Processor");
-//                    ObjectDetectorOptions objectDetectorOptions =
-//                            PreferenceUtils.getObjectDetectorOptionsForLivePreview(this);
-//                    imageProcessor = new ObjectDetectorProcessor(this, objectDetectorOptions);
-//                    break;
-//                case OBJECT_DETECTION_CUSTOM:
-//                    Log.i(TAG, "Using Custom Object Detector (Bird) Processor");
-//                    LocalModel localModel =
-//                            new LocalModel.Builder()
-//                                    .setAssetFilePath("custom_models/bird_classifier.tflite")
-//                                    .build();
-//                    CustomObjectDetectorOptions customObjectDetectorOptions =
-//                            PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(this, localModel);
-//                    imageProcessor = new ObjectDetectorProcessor(this, customObjectDetectorOptions);
-//                    break;
-//                case TEXT_RECOGNITION:
-//                    Log.i(TAG, "Using on-device Text recognition Processor");
-//                    imageProcessor = new TextRecognitionProcessor(this);
-//                    break;
                 case FACE_DETECTION:
                     Log.i(TAG, "Using Face Detector Processor");
+//                    FaceDetectorOptions faceDetectorOptions =
+//                            PreferenceUtils.getFaceDetectorOptionsForLivePreview(this);
                     FaceDetectorOptions faceDetectorOptions =
-                            PreferenceUtils.getFaceDetectorOptionsForLivePreview(this);
+                            new FaceDetectorOptions.Builder()
+                                    .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                                    .setMinFaceSize(0.15f)
+                                    .enableTracking()
+                                    .build();
                     imageProcessor = new FaceDetectorProcessor(this, faceDetectorOptions);
+
                     break;
 //                case BARCODE_SCANNING:
 //                    Log.i(TAG, "Using Barcode Detector Processor");

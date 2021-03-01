@@ -1,7 +1,19 @@
 {
-  "text_samples": [
-    "first sample",
-    "second sample",
-    "third sample"
+  "feature_samples": {
+    "zoom_samples": [
+      "Let me know if you can see this initial zoom statement",
+      "first sample",
+      "second sample",
+      "third sample"
+    ],
+    "flip_samples": [
+      "Let me know if you can see this initial flip statement",
+      "first sample",
+      "second sample",
+      "third sample"
+    ]
+  },
+  "instructions": [
+    "first instruction"
   ]
 }

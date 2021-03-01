@@ -1,46 +1,33 @@
 package com.omistark.smartvue.sample;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 
 public class Instruction {
-//    JSONParser parser = new JSONParser();
+    private static final String TAG = "Instruction";
     String jsonVal = "";
+    int i = -1;
+    JSONObject textSamples;
     public Instruction(Context applicationContext){
-//        parser = new JSONParser();
-//        try {
-//            Object obj = parser.parse(new FileReader("assets/samples/samples.json"));
-//
-//            // A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
-//            JSONObject jsonObject = (JSONObject) obj;
-//
-//            // A JSON array. JSONObject supports java.util.List interface.
-//            JSONArray companyList = (JSONArray) jsonObject.get("Company List");
-//
-//            // An iterator over a collection. Iterator takes the place of Enumeration in the Java Collections Framework.
-//            // Iterators differ from enumerations in two ways:
-//            // 1. Iterators allow the caller to remove elements from the underlying collection during the iteration with well-defined semantics.
-//            // 2. Method names have been improved.
-//            Iterator<JSONObject> iterator = companyList.iterator();
-//            while (iterator.hasNext()) {
-//                System.out.println(iterator.next());
-//            }
-//        }catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-        jsonVal = loadJSONFromAsset(applicationContext);
+        try {
+            jsonVal = loadJSONFromAsset(applicationContext);
+            // A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
+            JSONObject jsonObject = new JSONObject(jsonVal);
+            // A JSON array. JSONObject supports java.util.List interface.
+            textSamples = (JSONObject) jsonObject.get("feature_samples");
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public String loadJSONFromAsset(Context applicationContext) {
@@ -59,7 +46,20 @@ public class Instruction {
         return json;
     }
 
-    public String getSample(){
+    public String getSample(String featureName){
+        JSONArray featureSamples;
+        i++;
+        Log.d(TAG, "Load create phase");
+        try {
+            featureSamples = (JSONArray) textSamples.get(featureName);
+            jsonVal = featureSamples.getString(i);
+            if(i >= featureSamples.length()){
+                i = -1;
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
         return jsonVal;
     }
 }

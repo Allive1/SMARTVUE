@@ -18,6 +18,7 @@ package com.omistark.smartvue.processing.detection.facedetector;
 
 import android.content.Context;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ import com.google.mlkit.vision.common.InputImage;
 //import com.google.mlkit.vision.demo.GraphicOverlay;
 //import com.google.mlkit.vision.demo.java.VisionProcessorBase;
 import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
@@ -73,6 +75,36 @@ public class FaceDetectorProcessor extends VisionProcessorBase<List<Face>> {
   @Override
   protected void onSuccess(@NonNull List<Face> faces, @NonNull GraphicOverlay graphicOverlay) {
     for (Face face : faces) {
+
+      Rect bounds = face.getBoundingBox();
+      float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
+      float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
+
+      // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
+      // nose available):
+      FaceLandmark leftEar = face.getLandmark(FaceLandmark.LEFT_EAR);
+      if (leftEar != null) {
+        PointF leftEarPos = leftEar.getPosition();
+      }
+
+//      // If contour detection was enabled:
+//      List<PointF> leftEyeContour =
+//              face.getContour(FaceContour.LEFT_EYE).getPoints();
+//      List<PointF> upperLipBottomContour =
+//              face.getContour(FaceContour.UPPER_LIP_BOTTOM).getPoints();
+//
+//      // If classification was enabled:
+//      if (face.getSmilingProbability() != null) {
+//        float smileProb = face.getSmilingProbability();
+//      }
+//      if (face.getRightEyeOpenProbability() != null) {
+//        float rightEyeOpenProb = face.getRightEyeOpenProbability();
+//      }
+//
+//      // If face tracking was enabled:
+//      if (face.getTrackingId() != null) {
+//        int id = face.getTrackingId();
+//      }
       graphicOverlay.add(new FaceGraphic(graphicOverlay, face));
       logExtrasForTesting(face);
     }
